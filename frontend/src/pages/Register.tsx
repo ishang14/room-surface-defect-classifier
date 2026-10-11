@@ -11,7 +11,10 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { API_BASE_URL } from "../config";
+import {
+  getApiErrorMessage,
+  register,
+} from "../services/api";
 
 
 function Register() {
@@ -81,36 +84,10 @@ function Register() {
 
     try {
 
-      const response =
-        await fetch(
-          `${API_BASE_URL}/auth/register`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              email,
-              password,
-            }),
-          }
-        );
-
-
-      if (!response.ok) {
-
-        const data =
-          await response.json();
-
-        throw new Error(
-          data.detail ||
-          "Unable to create account."
-        );
-
-      }
+      await register(
+        email,
+        password
+      );
 
 
       /*
@@ -125,9 +102,10 @@ function Register() {
     } catch (error) {
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong."
+        getApiErrorMessage(
+          error,
+          "Unable to create account."
+        )
       );
 
     } finally {

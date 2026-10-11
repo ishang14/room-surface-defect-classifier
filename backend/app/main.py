@@ -1,9 +1,10 @@
 import os
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+from backend.app.core.uploads import UPLOAD_DIR
 
 from backend.app.routes.auth import (
     router as auth_router,
@@ -25,10 +26,6 @@ from backend.app.routes.images import (
     router as images_router,
 )
 
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
-UPLOAD_DIR = PROJECT_ROOT / "uploads"
 
 # StaticFiles refuses to mount a missing directory, and `uploads/` is
 # gitignored so it will not exist on a fresh deploy.

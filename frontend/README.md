@@ -24,6 +24,7 @@ src/
 ├── pages/        Login, Register, InspectionDashboard, InspectionReport
 ├── services/     Axios client and API calls (JWT attached automatically)
 ├── types/        Shared TypeScript types
+├── utils/        Shared helpers (condition score, severity styles, label formatting)
 └── config.ts     API / uploads base URLs
 ```
 

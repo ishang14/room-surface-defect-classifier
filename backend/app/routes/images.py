@@ -1,7 +1,4 @@
-import io
 import uuid
-
-from pathlib import Path
 
 from fastapi import (
     APIRouter,
@@ -12,12 +9,15 @@ from fastapi import (
     status,
 )
 
-from PIL import Image as PILImage
-
 from sqlalchemy.orm import Session
 
 from backend.app.core.dependencies import (
     get_current_user,
+)
+
+from backend.app.core.uploads import (
+    UPLOAD_DIR,
+    read_image_upload,
 )
 
 from backend.app.db.database import get_db
@@ -34,33 +34,6 @@ from ml.src.inference import predict_image
 
 
 router = APIRouter()
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-
-UPLOAD_DIR = PROJECT_ROOT / "uploads"
-
-
-UPLOAD_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
-
-
-# Largest accepted upload.
-MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-
-
-# Stored extension, chosen from the decoded image format rather than the
-# client-supplied filename. Uploads are served back as static files, so a
-# user-controlled extension (e.g. ".html") must never reach the disk.
-ALLOWED_IMAGE_EXTENSIONS = {
-    "JPEG": ".jpg",
-    "PNG": ".png",
-    "WEBP": ".webp",
-    "BMP": ".bmp",
-    "GIF": ".gif",
-}
 
 
 @router.post(
@@ -105,80 +78,20 @@ async def upload_image(
 
 
     # ---------------------------------------------------------
-    # Validate file type
+    # Read and validate image
     # ---------------------------------------------------------
 
-    if (
-        not file.content_type
-        or not file.content_type.startswith("image/")
-    ):
-
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File must be an image",
-        )
-
-
-    # ---------------------------------------------------------
-    # Read image
-    # ---------------------------------------------------------
-
-    image_bytes = await file.read(
-        MAX_UPLOAD_BYTES + 1
+    image_bytes, image, file_extension = (
+        await read_image_upload(file)
     )
 
 
-    if len(image_bytes) > MAX_UPLOAD_BYTES:
-
-        raise HTTPException(
-            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-            detail="Image must be 10 MB or smaller",
-        )
-
-
-    try:
-
-        opened = PILImage.open(
-            io.BytesIO(image_bytes)
-        )
-
-        image_format = opened.format
-
-        image = opened.convert("RGB")
-
-    except Exception:
-
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid image file",
-        )
-
-
     # ---------------------------------------------------------
-    # Generate unique filename
+    # Run ML inference
     # ---------------------------------------------------------
 
-    file_extension = ALLOWED_IMAGE_EXTENSIONS.get(
-        image_format
-    )
-
-
-    if file_extension is None:
-
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Unsupported image format",
-        )
-
-
-    unique_filename = (
-        f"{uuid.uuid4().hex}{file_extension}"
-    )
-
-
-    file_path = (
-        UPLOAD_DIR /
-        unique_filename
+    result = predict_image(
+        image
     )
 
 
@@ -186,7 +99,12 @@ async def upload_image(
     # Save physical file
     # ---------------------------------------------------------
 
-    file_path.write_bytes(
+    unique_filename = (
+        f"{uuid.uuid4().hex}{file_extension}"
+    )
+
+
+    (UPLOAD_DIR / unique_filename).write_bytes(
         image_bytes
     )
 
@@ -212,15 +130,6 @@ async def upload_image(
 
 
     # ---------------------------------------------------------
-    # Run ML inference
-    # ---------------------------------------------------------
-
-    result = predict_image(
-        image
-    )
-
-
-    # ---------------------------------------------------------
     # Create Prediction record
     # ---------------------------------------------------------
 
@@ -233,6 +142,9 @@ async def upload_image(
 
 
     db.add(new_prediction)
+
+
+    room.inspection.status = "completed"
 
 
     # ---------------------------------------------------------

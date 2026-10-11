@@ -7,85 +7,12 @@ import { getInspection } from "../services/api";
 
 import type {
   Inspection,
-  Severity,
 } from "../types/inspection";
-
-
-function formatPredictionLabel(
-  label: string
-) {
-
-  return label
-    .split("_")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
-    .join(" ");
-
-}
-
-
-function getSeverityStyles(
-  severity: Severity
-) {
-
-  switch (severity) {
-
-    case "None":
-      return {
-        badge:
-          "bg-emerald-50 text-emerald-700 border-emerald-200",
-        dot:
-          "bg-emerald-500",
-        accent:
-          "border-l-emerald-500",
-      };
-
-    case "Low":
-      return {
-        badge:
-          "bg-lime-50 text-lime-700 border-l-lime-500 border-l-4",
-        dot:
-          "bg-lime-500",
-        accent:
-          "border-l-lime-500",
-      };
-
-    case "Medium":
-      return {
-        badge:
-          "bg-amber-50 text-amber-700 border-amber-200",
-        dot:
-          "bg-amber-500",
-        accent:
-          "border-l-amber-500",
-      };
-
-    case "High":
-      return {
-        badge:
-          "bg-red-50 text-red-700 border-red-200",
-        dot:
-          "bg-red-500",
-        accent:
-          "border-l-red-500",
-      };
-
-    default:
-      return {
-        badge:
-          "bg-stone-50 text-stone-600 border-stone-200",
-        dot:
-          "bg-stone-400",
-        accent:
-          "border-l-stone-400",
-      };
-
-  }
-
-}
+import {
+  calculateConditionScore,
+  formatPredictionLabel,
+  getSeverityStyles,
+} from "../utils/inspection";
 
 
 function InspectionReport() {
@@ -237,30 +164,10 @@ function InspectionReport() {
     ).length;
 
 
-  const severityScore: Record<
-    Severity,
-    number
-  > = {
-    None: 100,
-    Low: 85,
-    Medium: 65,
-    High: 35,
-  };
-
-
   const overallCondition =
-    predictedImages.length === 0
-      ? null
-      : Math.round(
-          predictedImages.reduce(
-            (total, image) =>
-              total +
-              severityScore[
-                image.prediction!.severity
-              ],
-            0
-          ) / predictedImages.length
-        );
+    calculateConditionScore(
+      allImages
+    );
 
 
   const formattedDate =
@@ -815,20 +722,9 @@ function InspectionReport() {
 
 
                 const roomScore =
-                  roomPredictions.length === 0
-                    ? null
-                    : Math.round(
-                        roomPredictions.reduce(
-                          (total, image) =>
-                            total +
-                            severityScore[
-                              image.prediction!
-                                .severity
-                            ],
-                          0
-                        ) /
-                          roomPredictions.length
-                      );
+                  calculateConditionScore(
+                    room.images
+                  );
 
 
                 const roomIssues =

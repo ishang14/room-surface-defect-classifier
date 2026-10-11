@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 
 import { API_BASE_URL } from "../config";
 
@@ -83,6 +83,82 @@ api.interceptors.response.use(
 
   }
 );
+
+
+/*
+ * Turn a failed request into a message for the user.
+ *
+ * FastAPI returns `detail` as a string for HTTP errors and as an
+ * array of field errors for request validation (422).
+ */
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallback: string
+): string {
+
+  if (!isAxiosError(error)) {
+    return fallback;
+  }
+
+
+  const detail =
+    error.response?.data?.detail;
+
+
+  if (typeof detail === "string") {
+    return detail;
+  }
+
+
+  if (Array.isArray(detail)) {
+
+    const location: unknown[] =
+      detail[0]?.loc ?? [];
+
+    if (location.includes("password")) {
+      return "Password must be at least 8 characters.";
+    }
+
+    if (location.includes("email")) {
+      return "Please enter a valid email address.";
+    }
+
+  }
+
+
+  return fallback;
+}
+
+
+export async function login(
+  email: string,
+  password: string
+): Promise<void> {
+
+  const response =
+    await api.post<{ access_token: string }>(
+      "/auth/login",
+      { email, password }
+    );
+
+  localStorage.setItem(
+    "access_token",
+    response.data.access_token
+  );
+}
+
+
+export async function register(
+  email: string,
+  password: string
+): Promise<void> {
+
+  await api.post(
+    "/auth/register",
+    { email, password }
+  );
+}
 
 
 export async function getInspections(): Promise<

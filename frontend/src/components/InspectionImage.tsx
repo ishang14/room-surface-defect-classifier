@@ -2,83 +2,19 @@ import { useRef, useState } from "react";
 
 import type {
   InspectionImage as InspectionImageType,
-  Severity,
 } from "../types/inspection";
 
 import { SERVER_BASE_URL } from "../config";
 import { uploadRoomImage } from "../services/api";
+import {
+  formatPredictionLabel,
+  getSeverityStyles,
+} from "../utils/inspection";
 
 
 interface InspectionImageProps {
   image: InspectionImageType;
   roomName: string;
-}
-
-
-function getSeverityStyles(
-  severity: Severity
-) {
-
-  switch (severity) {
-
-    case "None":
-      return {
-        badge:
-          "bg-emerald-50 text-emerald-700 border-emerald-200",
-        dot:
-          "bg-emerald-500",
-      };
-
-    case "Low":
-      return {
-        badge:
-          "bg-lime-50 text-lime-700 border-lime-200",
-        dot:
-          "bg-lime-500",
-      };
-
-    case "Medium":
-      return {
-        badge:
-          "bg-amber-50 text-amber-700 border-amber-200",
-        dot:
-          "bg-amber-500",
-      };
-
-    case "High":
-      return {
-        badge:
-          "bg-red-50 text-red-700 border-red-200",
-        dot:
-          "bg-red-500",
-      };
-
-    default:
-      return {
-        badge:
-          "bg-stone-50 text-stone-600 border-stone-200",
-        dot:
-          "bg-stone-400",
-      };
-
-  }
-
-}
-
-
-function formatPredictionLabel(
-  label: string
-) {
-
-  return label
-    .split("_")
-    .map(
-      (word) =>
-        word.charAt(0).toUpperCase() +
-        word.slice(1)
-    )
-    .join(" ");
-
 }
 
 

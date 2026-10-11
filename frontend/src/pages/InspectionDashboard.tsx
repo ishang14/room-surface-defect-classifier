@@ -30,6 +30,8 @@ import type {
   Room,
 } from "../types/inspection";
 
+import { calculateConditionScore } from "../utils/inspection";
+
 
 function InspectionDashboard() {
 
@@ -387,63 +389,6 @@ function InspectionDashboard() {
         );
 
 
-      /*
-       * Application-level condition score.
-       *
-       * This is separate from the CNN's
-       * classification accuracy.
-       */
-
-      let overallCondition:
-        number | null = null;
-
-
-      if (
-        predictedImages.length > 0
-      ) {
-
-        const severityScore = {
-          None: 100,
-          Low: 90,
-          Medium: 65,
-          High: 30,
-        };
-
-
-        const totalScore =
-          predictedImages.reduce(
-            (
-              total,
-              image
-            ) => {
-
-              const severity =
-                image.prediction?.severity;
-
-
-              return (
-                total +
-                (
-                  severity
-                    ? severityScore[
-                        severity
-                      ]
-                    : 0
-                )
-              );
-
-            },
-            0
-          );
-
-
-        overallCondition =
-          totalScore /
-          predictedImages.length;
-
-      }
-
-
       return {
 
         photoCount:
@@ -459,11 +404,9 @@ function InspectionDashboard() {
           highRisk.length,
 
         overallCondition:
-          overallCondition !== null
-            ? Math.round(
-                overallCondition
-              )
-            : null,
+          calculateConditionScore(
+            allImages
+          ),
 
       };
 

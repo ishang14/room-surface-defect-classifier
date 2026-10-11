@@ -11,7 +11,10 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { API_BASE_URL } from "../config";
+import {
+  getApiErrorMessage,
+  login,
+} from "../services/api";
 
 
 function Login() {
@@ -55,101 +58,20 @@ function Login() {
 
     try {
 
-      const response =
-        await fetch(
-          `${API_BASE_URL}/auth/login`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              email,
-              password,
-            }),
-          }
-        );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        let errorMessage =
-          "Invalid email or password";
-
-
-        /*
-         * FastAPI validation errors
-         * return detail as an array of
-         * error objects.
-         */
-
-        if (
-          Array.isArray(data.detail)
-        ) {
-
-          const validationError =
-            data.detail[0];
-
-
-          if (
-            validationError?.loc?.includes(
-              "password"
-            )
-          ) {
-
-            errorMessage =
-              "Password must be at least 8 characters.";
-
-          } else if (
-            validationError?.loc?.includes(
-              "email"
-            )
-          ) {
-
-            errorMessage =
-              "Please enter a valid email address.";
-
-          }
-
-        } else if (
-          typeof data.detail ===
-          "string"
-        ) {
-
-          errorMessage =
-            data.detail;
-
-        }
-
-
-        throw new Error(
-          errorMessage
-        );
-
-      }
-
-
-      localStorage.setItem(
-        "access_token",
-        data.access_token
+      await login(
+        email,
+        password
       );
-
 
       navigate("/");
 
     } catch (error) {
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Something went wrong."
+        getApiErrorMessage(
+          error,
+          "Invalid email or password"
+        )
       );
 
     } finally {
@@ -380,14 +302,6 @@ function Login() {
                   >
                     Password
                   </label>
-
-                  <button
-                    type="button"
-                    className="text-xs font-medium text-stone-400"
-                    disabled
-                  >
-                    Forgot password?
-                  </button>
 
                 </div>
 

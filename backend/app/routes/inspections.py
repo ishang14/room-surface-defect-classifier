@@ -134,8 +134,6 @@ def get_inspection(
 
     rooms = []
 
-    has_prediction = False
-
 
     for room in inspection.rooms:
 
@@ -143,11 +141,6 @@ def get_inspection(
 
 
         for image in room.images:
-
-            if image.prediction is not None:
-
-                has_prediction = True
-
 
             image_data = {
                 "id": image.id,
@@ -169,16 +162,6 @@ def get_inspection(
                 "images": images,
             }
         )
-
-
-    inspection.status = (
-        "completed"
-        if has_prediction
-        else "created"
-    )
-
-
-    db.commit()
 
 
     return {
