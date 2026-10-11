@@ -4,7 +4,7 @@ services:
 
     image: postgres:18
 
-    container_name: apartment-inspection-postgres
+    container_name: room-surface-defect-postgres
 
     environment:
       POSTGRES_USER: ${DATABASE_USER}
@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
 
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
     ports:
       - "5432:5432"
@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
 
-    container_name: apartment-inspection-backend
+    container_name: room-surface-defect-backend
 
     env_file:
       - .env
@@ -58,7 +58,7 @@ services:
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:8000/api}
 
-    container_name: apartment-inspection-frontend
+    container_name: room-surface-defect-frontend
 
     ports:
       - "5173:80"

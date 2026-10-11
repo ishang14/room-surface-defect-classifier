@@ -185,6 +185,8 @@ function InspectionDashboard() {
 
   useEffect(() => {
 
+    // Fetch-on-mount: the setState calls happen after the request resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadInspections();
 
   }, []);
@@ -206,6 +208,7 @@ function InspectionDashboard() {
 
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadInspection(
       selectedInspectionId
     );

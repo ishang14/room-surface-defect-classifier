@@ -18,7 +18,7 @@ MODEL_PATH = (
     PROJECT_ROOT
     / "ml"
     / "models"
-    / "apartment_inspection_resnet18.pth"
+    / "room_surface_defect_resnet18.pth"
 )
 
 

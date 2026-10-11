@@ -1,8 +1,15 @@
-from model import load_model
+"""Smoke test: load the trained weights.
+
+Usage (from the repository root):
+
+    python -m ml.src.test_model
+"""
+
 import torch
 
+from ml.src.inference import MODEL_PATH
+from ml.src.model import load_model
 
-MODEL_PATH = "../models/apartment_inspection_resnet18.pth"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 

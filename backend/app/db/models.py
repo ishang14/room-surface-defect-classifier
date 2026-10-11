@@ -1,9 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.db.database import Base
+
+
+def utcnow() -> datetime:
+    # Columns are timezone-naive UTC, so strip tzinfo after reading the clock.
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class User(Base):
@@ -29,7 +34,7 @@ class User(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=utcnow,
         nullable=False,
     )
 
@@ -72,7 +77,7 @@ class Inspection(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=utcnow,
         nullable=False,
     )
 
@@ -136,7 +141,7 @@ class Image(Base):
 
     uploaded_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=utcnow,
         nullable=False,
     )
 
@@ -183,7 +188,7 @@ class Prediction(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=utcnow,
         nullable=False,
     )
 

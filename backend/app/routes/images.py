@@ -1,5 +1,4 @@
 import io
-import shutil
 import uuid
 
 from pathlib import Path
@@ -43,8 +42,25 @@ UPLOAD_DIR = PROJECT_ROOT / "uploads"
 
 
 UPLOAD_DIR.mkdir(
+    parents=True,
     exist_ok=True
 )
+
+
+# Largest accepted upload.
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+
+
+# Stored extension, chosen from the decoded image format rather than the
+# client-supplied filename. Uploads are served back as static files, so a
+# user-controlled extension (e.g. ".html") must never reach the disk.
+ALLOWED_IMAGE_EXTENSIONS = {
+    "JPEG": ".jpg",
+    "PNG": ".png",
+    "WEBP": ".webp",
+    "BMP": ".bmp",
+    "GIF": ".gif",
+}
 
 
 @router.post(
@@ -107,14 +123,28 @@ async def upload_image(
     # Read image
     # ---------------------------------------------------------
 
-    image_bytes = await file.read()
+    image_bytes = await file.read(
+        MAX_UPLOAD_BYTES + 1
+    )
+
+
+    if len(image_bytes) > MAX_UPLOAD_BYTES:
+
+        raise HTTPException(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail="Image must be 10 MB or smaller",
+        )
 
 
     try:
 
-        image = PILImage.open(
+        opened = PILImage.open(
             io.BytesIO(image_bytes)
-        ).convert("RGB")
+        )
+
+        image_format = opened.format
+
+        image = opened.convert("RGB")
 
     except Exception:
 
@@ -128,21 +158,16 @@ async def upload_image(
     # Generate unique filename
     # ---------------------------------------------------------
 
-    original_filename = (
-        file.filename or "image"
+    file_extension = ALLOWED_IMAGE_EXTENSIONS.get(
+        image_format
     )
 
 
-    file_extension = Path(
-        original_filename
-    ).suffix.lower()
-
-
-    if not file_extension:
+    if file_extension is None:
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Image must have a file extension",
+            detail="Unsupported image format",
         )
 
 
@@ -161,12 +186,9 @@ async def upload_image(
     # Save physical file
     # ---------------------------------------------------------
 
-    with file_path.open("wb") as buffer:
-
-        shutil.copyfileobj(
-            io.BytesIO(image_bytes),
-            buffer,
-        )
+    file_path.write_bytes(
+        image_bytes
+    )
 
 
     image_url = (

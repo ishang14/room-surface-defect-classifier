@@ -49,7 +49,7 @@ ALLOWED_ORIGINS = [
 
 
 app = FastAPI(
-    title="AI Apartment Inspection API",
+    title="Room Surface Defect Classifier API",
     version="1.0.0",
 )
 
@@ -118,5 +118,5 @@ app.include_router(
 def root():
 
     return {
-        "message": "AI Apartment Inspection API is running"
+        "message": "Room Surface Defect Classifier API is running"
     }
