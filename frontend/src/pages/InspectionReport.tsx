@@ -958,7 +958,7 @@ function InspectionReport() {
         <footer className="mt-10 border-t border-stone-200 pt-6">
 
           <p className="text-center text-[11px] leading-5 text-stone-400">
-            AI Apartment Inspection · Inspection #
+            Room Surface Defect Classifier · Inspection #
             {inspection.id}
           </p>
 

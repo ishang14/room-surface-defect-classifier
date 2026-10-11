@@ -5,7 +5,7 @@ from pathlib import Path
 from PIL import Image
 from torchvision import transforms
 
-from ml.src.model import load_model
+from ml.src.model import CLASS_NAMES, load_model
 
 
 # --------------------------------------------------
@@ -20,21 +20,6 @@ MODEL_PATH = (
     / "models"
     / "room_surface_defect_resnet18.pth"
 )
-
-
-# --------------------------------------------------
-# Classes
-# --------------------------------------------------
-
-CLASS_NAMES = [
-    "algae",
-    "major_crack",
-    "minor_crack",
-    "peeling",
-    "plain",
-    "spalling",
-    "stain",
-]
 
 
 # --------------------------------------------------

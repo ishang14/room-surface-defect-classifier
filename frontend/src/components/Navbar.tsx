@@ -63,7 +63,7 @@ function Navbar({
               text-stone-900
               sm:text-base
             ">
-              Apartment Inspection
+              Room Surface Defect Classifier
             </h1>
 
 

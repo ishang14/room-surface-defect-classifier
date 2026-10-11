@@ -181,7 +181,7 @@ function Login() {
               <div>
 
                 <p className="text-sm font-bold text-white">
-                  Apartment Inspection
+                  Room Surface Defect Classifier
                 </p>
 
                 <p className="text-xs text-stone-400">
@@ -263,7 +263,7 @@ function Login() {
           <div className="px-16 pb-8">
 
             <p className="text-xs text-stone-600">
-              © 2026 Apartment Inspection
+              © 2026 Room Surface Defect Classifier
             </p>
 
           </div>
@@ -288,7 +288,7 @@ function Login() {
               <div>
 
                 <p className="text-sm font-bold text-stone-900">
-                  Apartment Inspection
+                  Room Surface Defect Classifier
                 </p>
 
                 <p className="text-xs text-stone-500">
